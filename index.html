@@ -1,1 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Movie AR Experience</title>
 
+  <!-- MindAR + A-Frame -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; }
+    body { overflow: hidden; font-family: Arial, sans-serif; }
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      color: white;
+      transition: opacity 0.5s;
+    }
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loader {
+      width: 50px; height: 50px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #FFD700;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Info Bar */
+    #info-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      max-width: 90%;
+    }
+
+    /* Play Button Overlay */
+    #play-btn {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 215, 0, 0.9);
+      color: #000;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 200;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <h2>🎬 Movie AR</h2>
+    <p style="margin-top:10px; opacity:0.7;">Loading experience...</p>
+  </div>
+
+  <!-- Info Bar -->
+  <div id="info-bar">
+    📱 Point your camera at a movie poster
+  </div>
+
+  <!-- Play Button for iOS -->
+  <button id="play-btn" onclick="playVideo()">▶ Tap to Play Trailer</button>
+
+  <!-- AR Scene -->
+  <a-scene
+    mindar-image="imageTargetSrc: assets/targets.mind; autoStart: true; uiLoading: no; uiScanning: no;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    renderer="antialias: true; alpha: true"
+    color-space="sRGB"
+  >
+    <!-- ==================== -->
+    <!--    ASSET MANAGEMENT   -->
+    <!-- ==================== -->
+    <a-assets>
+      <!-- Movie Posters -->
+      <img id="poster1" src="assets/posters/movie1-poster.jpg">
+      <img id="poster2" src="assets/posters/movie2-poster.jpg">
+      <img id="poster3" src="assets/posters/movie3-poster.jpg">
+
+      <!-- Movie Trailers -->
+      <video id="trailer1" src="assets/videos/movie1-trailer.mp4"
+             preload="auto" loop playsinline webkit-playsinline
+             crossorigin="anonymous"></video>
+      <video id="trailer2" src="assets/videos/movie2-trailer.mp4"
+             preload="auto" loop playsinline webkit-playsinline
+             crossorigin="anonymous"></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <!-- ========================= -->
+    <!--  TARGET 0: MOVIE 1        -->
+    <!--  (Poster + Video Trailer) -->
+    <!-- ========================= -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      <!-- Video plays on top of the poster -->
+      <a-video
+        src="#trailer1"
+        position="0 0 0.01"
+        width="1.2"
+        height="0.675"
+      ></a-video>
+
+      <!-- Movie info bar below -->
+      <a-plane
+        position="0 -0.55 0.01"
+        width="1.2"
+        height="0.2"
+        color="#1a1a2e"
+        opacity="0.9"
+      ></a-plane>
+      <a-text
+        value="🎬 Movie 1 - Now Showing!"
+        position="0 -0.55 0.02"
+        width="1.0"
+        align="center"
+        color="#FFD700"
+      ></a-text>
+    </a-entity>
+
+    <!-- ========================= -->
+    <!--  TARGET 1: MOVIE 2        -->
+    <!--  (Poster + Video Trailer) -->
+    <!-- ========================= -->
+    <a-entity mindar-image-target="targetIndex: 1">
+      <a-video
+        src="#trailer2"
+        position="0 0 0.01"
+        width="1.2"
+        height="0.675"
+      ></a-video>
+
+      <a-plane
+        position="0 -0.55 0.01"
+        width="1.2"
+        height="0.2"
+        color="#1a1a2e"
+        opacity="0.9"
+      ></a-plane>
+      <a-text
+        value="🎬 Movie 2 - Coming Soon!"
+        position="0 -0.55 0.02"
+        width="1.0"
+        align="center"
+        color="#00BFFF"
+      ></a-text>
+    </a-entity>
+
+    <!-- ========================= -->
+    <!--  TARGET 2: MOVIE 3        -->
+    <!--  (Poster Image Only)      -->
+    <!-- ========================= -->
+    <a-entity mindar-image-target="targetIndex: 2">
+      <a-image
+        src="#poster3"
+        position="0 0 0.01"
+        width="1"
+        height="1.4"
+        animation="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine"
+      ></a-image>
+
+      <a-plane
+        position="0 -0.85 0.01"
+        width="1.2"
+        height="0.2"
+        color="#1a1a2e"
+        opacity="0.9"
+      ></a-plane>
+      <a-text
+        value="🎬 Movie 3 - Sneak Peek!"
+        position="0 -0.85 0.02"
+        width="1.0"
+        align="center"
+        color="#FF6347"
+      ></a-text>
+    </a-entity>
+
+  </a-scene>
+
+  <!-- ==================== -->
+  <!--     SCRIPTS          -->
+  <!-- ==================== -->
+  <script>
+    const infoBar = document.getElementById('info-bar');
+    const playBtn = document.getElementById('play-btn');
+    let currentVideo = null;
+
+    // Hide loading screen when scene is ready
+    const scene = document.querySelector('a-scene');
+    scene.addEventListener('renderstart', () => {
+      document.getElementById('loading-screen').classList.add('hidden');
+    });
+
+    // Handle each target
+    const targets = document.querySelectorAll('[mindar-image-target]');
+    const movieNames = ['Movie 1', 'Movie 2', 'Movie 3'];
+
+    targets.forEach((target, index) => {
+      target.addEventListener('targetFound', () => {
+        console.log(`Target ${index} found`);
+        infoBar.textContent = `🎬 ${movieNames[index]} detected!`;
+
+        // Try to play video
+        const videoEl = target.querySelector('a-video');
+        if (videoEl) {
+          const videoSrc = videoEl.getAttribute('src');
+          const video = document.querySelector(videoSrc);
+          if (video) {
+            currentVideo = video;
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                // Autoplay blocked (iOS), show play button
+                playBtn.style.display = 'block';
+              });
+            }
+          }
+        }
+      });
+
+      target.addEventListener('targetLost', () => {
+        console.log(`Target ${index} lost`);
+        infoBar.textContent = '📱 Point your camera at a movie poster';
+        playBtn.style.display = 'none';
+
+        const videoEl = target.querySelector('a-video');
+        if (videoEl) {
+          const videoSrc = videoEl.getAttribute('src');
+          const video = document.querySelector(videoSrc);
+          if (video) video.pause();
+        }
+      });
+    });
+
+    // iOS play button handler
+    function playVideo() {
+      if (currentVideo) {
+        currentVideo.play();
+        playBtn.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>
